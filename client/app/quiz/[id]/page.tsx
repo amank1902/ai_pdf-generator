@@ -69,7 +69,7 @@ export default function QuizPage() {
     onSuccess: (response) => {
       if (response.success && response.data) {
         toast.success('Quiz submitted successfully!');
-        router.push(`/results/${response.data.resultId}`);
+        router.push(`/results/${response.data._id}`);
       }
     },
     onError: (error: any) => {
