@@ -97,6 +97,7 @@ export const submitQuiz = async (req: Request, res: Response) => {
       success: true,
       message: 'Quiz submitted successfully',
       data: {
+        _id: result._id,
         resultId: result._id,
         score,
         correctAnswers,
