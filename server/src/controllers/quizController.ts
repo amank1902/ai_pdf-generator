@@ -106,6 +106,7 @@ export const generateQuiz = async (req: Request, res: Response) => {
       success: true,
       message: 'Quiz generated successfully',
       data: {
+        _id: quiz._id,
         quizId: quiz._id,
         title: quiz.title,
         totalQuestions: quiz.totalQuestions,
