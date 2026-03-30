@@ -92,7 +92,7 @@ export default function UploadPage() {
 
       if (response.success && response.data) {
         toast.success('Quiz generated successfully!');
-        router.push(`/quiz/${response.data.quizId}`);
+        router.push(`/quiz/${response.data._id}`);
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to generate quiz');
