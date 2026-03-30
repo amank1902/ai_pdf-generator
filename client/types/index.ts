@@ -37,6 +37,7 @@ export interface Answer {
   questionIndex: number;
   selectedAnswer: number;
   timeTaken?: number;
+  isCorrect?: boolean;
 }
 
 export interface TopicPerformance {
