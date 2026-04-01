@@ -20,19 +20,7 @@ A modern, full-stack AI-powered quiz generation platform where users upload PDF 
 
 ## 🚀 Quick Start
 
-### Automated Installation
-
-Run the automated installer:
-```bash
-.\install.bat
-```
-
-This will:
-- ✅ Install all dependencies (frontend & backend)
-- ✅ Create environment files
-- ✅ Set up project structure
-
-### Manual Installation
+### Installation
 
 See detailed instructions in [SETUP_GUIDE.md](./SETUP_GUIDE.md)
 
@@ -99,8 +87,6 @@ ai_generator_pdf/
 │   │   └── utils/             # Helper functions
 │   └── uploads/               # PDF file storage
 │
-├── setup.bat                  # Quick setup script
-├── install.bat                # Automated installer
 ├── SETUP_GUIDE.md            # Detailed setup instructions
 └── README.md                 # This file
 ```
@@ -180,19 +166,3 @@ NEXT_PUBLIC_API_URL=http://localhost:5000
 
 See [SETUP_GUIDE.md](./SETUP_GUIDE.md#troubleshooting) for common issues and solutions.
 
-## 📝 License
-
-MIT License - Free to use for learning and portfolio projects!
-
-## 🙏 Credits
-
-- **AI:** Google Gemini 2.0 Flash
-- **Icons:** Lucide React
-- **Charts:** Recharts
-- **Animations:** Framer Motion
-
----
-
-**Built with ❤️ for education and learning**
-
-Need help? Check [SETUP_GUIDE.md](./SETUP_GUIDE.md) for detailed instructions!
