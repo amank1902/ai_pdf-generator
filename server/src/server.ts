@@ -2,10 +2,17 @@ import express, { Application, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import path from 'path';
+import helmet from 'helmet';
+import mongoSanitize from 'express-mongo-sanitize';
 import { connectDB } from './utils/db';
+import { validateEnv, validateConfig } from './utils/envValidation';
 
 // Load environment variables
 dotenv.config();
+
+// Validate environment variables before starting
+validateEnv();
+validateConfig();
 
 // Import routes
 import authRoutes from './routes/auth';
@@ -19,13 +26,31 @@ const app: Application = express();
 // Connect to database
 connectDB();
 
-// Middleware
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
-  credentials: true
+// Security Middleware
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+  crossOriginEmbedderPolicy: false,
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+// Data sanitization against NoSQL injection
+app.use(mongoSanitize());
+
+// CORS configuration
+import { corsOptionsDev } from './utils/corsConfig';
+
+app.use(cors(corsOptionsDev));
+// For production, use: app.use(cors(corsOptions));
+
+// Body parser with size limits (prevent DoS)
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Create uploads directory if it doesn't exist
 import fs from 'fs';

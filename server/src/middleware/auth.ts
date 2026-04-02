@@ -33,7 +33,16 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
 
     try {
       // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+      const secret = process.env.JWT_SECRET;
+      
+      if (!secret) {
+        return res.status(500).json({
+          success: false,
+          message: 'Server configuration error'
+        });
+      }
+      
+      const decoded = jwt.verify(token, secret) as JwtPayload;
 
       // Get user from token
       const user = await User.findById(decoded.id);

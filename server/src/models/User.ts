@@ -28,7 +28,14 @@ const userSchema = new Schema<IUser>({
   password: {
     type: String,
     required: [true, 'Please provide a password'],
-    minlength: [6, 'Password must be at least 6 characters'],
+    minlength: [8, 'Password must be at least 8 characters'],
+    validate: {
+      validator: function(password: string) {
+        // Require at least one uppercase, one lowercase, and one number
+        return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(password);
+      },
+      message: 'Password must contain at least one uppercase letter, one lowercase letter, and one number'
+    },
     select: false
   },
   createdAt: {
@@ -36,6 +43,10 @@ const userSchema = new Schema<IUser>({
     default: Date.now
   }
 });
+
+// Indexes for performance
+// Note: email already has unique index from schema definition (unique: true)
+userSchema.index({ createdAt: -1 });
 
 // Hash password before saving
 userSchema.pre('save', async function(next) {

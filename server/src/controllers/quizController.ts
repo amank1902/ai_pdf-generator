@@ -4,6 +4,7 @@ import { extractTextFromPDF } from '../services/pdfParser';
 import { generateQuizFromText } from '../services/geminiService';
 import path from 'path';
 import fs from 'fs';
+import { getSecureFilePath, isValidFileExtension, safeDeleteFile } from '../utils/fileValidation';
 
 // @desc    Upload PDF file
 // @route   POST /api/quiz/upload
@@ -35,7 +36,6 @@ export const uploadPDF = async (req: Request, res: Response) => {
       data: {
         filename: file.filename,
         originalName: file.originalname,
-        path: file.path,
         size: file.size
       }
     });
@@ -62,7 +62,26 @@ export const generateQuiz = async (req: Request, res: Response) => {
       });
     }
 
-    const filePath = path.join(__dirname, '../../uploads', filename);
+    // Validate file extension
+    if (!isValidFileExtension(filename, ['.pdf'])) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid file type. Only PDF files are allowed'
+      });
+    }
+
+    // Get secure file path (prevents path traversal)
+    const uploadDir = path.join(__dirname, '../../uploads');
+    let filePath: string;
+    
+    try {
+      filePath = getSecureFilePath(filename, uploadDir);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        message: error instanceof Error ? error.message : 'Invalid filename'
+      });
+    }
 
     // Check if file exists
     if (!fs.existsSync(filePath)) {
@@ -102,6 +121,18 @@ export const generateQuiz = async (req: Request, res: Response) => {
       totalQuestions: questions.length
     });
 
+    // Clean up uploaded PDF file after processing
+    await safeDeleteFile(filePath);
+
+    // Remove sensitive data (correct answers and explanations) from response
+    const questionsWithoutAnswers = quiz.questions.map(q => ({
+      question: q.question,
+      options: q.options,
+      topic: q.topic,
+      difficulty: q.difficulty
+      // correctAnswer and explanation are hidden until quiz submission
+    }));
+
     res.status(201).json({
       success: true,
       message: 'Quiz generated successfully',
@@ -110,7 +141,7 @@ export const generateQuiz = async (req: Request, res: Response) => {
         quizId: quiz._id,
         title: quiz.title,
         totalQuestions: quiz.totalQuestions,
-        questions: quiz.questions
+        questions: questionsWithoutAnswers
       }
     });
   } catch (error: any) {
@@ -144,9 +175,26 @@ export const getQuiz = async (req: Request, res: Response) => {
       });
     }
 
+    // Remove correct answers and explanations from response
+    // These should only be revealed after quiz submission
+    const questionsWithoutAnswers = quiz.questions.map(q => ({
+      question: q.question,
+      options: q.options,
+      topic: q.topic,
+      difficulty: q.difficulty
+    }));
+
     res.status(200).json({
       success: true,
-      data: quiz
+      data: {
+        _id: quiz._id,
+        userId: quiz.userId,
+        title: quiz.title,
+        pdfName: quiz.pdfName,
+        totalQuestions: quiz.totalQuestions,
+        questions: questionsWithoutAnswers,
+        createdAt: quiz.createdAt
+      }
     });
   } catch (error: any) {
     console.error('Get quiz error:', error);

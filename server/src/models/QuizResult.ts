@@ -120,4 +120,10 @@ const quizResultSchema = new Schema<IQuizResult>({
   }
 });
 
+// Indexes for performance
+quizResultSchema.index({ userId: 1, createdAt: -1 });
+quizResultSchema.index({ quizId: 1, userId: 1 });
+quizResultSchema.index({ userId: 1 });
+quizResultSchema.index({ createdAt: -1 });
+
 export default mongoose.model<IQuizResult>('QuizResult', quizResultSchema);

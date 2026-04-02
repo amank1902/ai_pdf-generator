@@ -84,4 +84,9 @@ const quizSchema = new Schema<IQuiz>({
   }
 });
 
+// Indexes for performance
+quizSchema.index({ userId: 1, createdAt: -1 });
+quizSchema.index({ userId: 1 });
+quizSchema.index({ createdAt: -1 });
+
 export default mongoose.model<IQuiz>('Quiz', quizSchema);

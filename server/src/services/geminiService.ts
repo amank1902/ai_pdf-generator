@@ -1,16 +1,26 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { IQuestion } from '../models/Quiz';
+import { sanitizeTextForAI, validateExtractedText } from '../utils/textSanitization';
 
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 export const generateQuizFromText = async (text: string): Promise<IQuestion[]> => {
   try {
+    // Validate text quality
+    const validation = validateExtractedText(text);
+    if (!validation.valid) {
+      throw new Error(validation.message);
+    }
+
+    // Sanitize text to prevent prompt injection
+    const sanitizedText = sanitizeTextForAI(text);
+
     // Limit text length to avoid token limits
     const maxTextLength = 3000;
-    const textToProcess = text.length > maxTextLength 
-      ? text.substring(0, maxTextLength) 
-      : text;
+    const textToProcess = sanitizedText.length > maxTextLength 
+      ? sanitizedText.substring(0, maxTextLength) 
+      : sanitizedText;
 
     // Use gemini-1.5-pro model
     const model = genAI.getGenerativeModel({ 
